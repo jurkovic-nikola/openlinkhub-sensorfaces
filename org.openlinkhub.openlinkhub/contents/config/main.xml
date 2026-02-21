@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+    <kcfgfile name=""/>
+
+    <group name="General">
+        <entry name="url" type="String">
+            <default>http://127.0.0.1:27003/api/devices/</default>
+        </entry>
+
+        <entry name="refreshMs" type="Int">
+            <default>2000</default>
+            <min>200</min>
+            <max>60000</max>
+        </entry>
+
+        <entry name="showHubHeader" type="Bool">
+            <default>true</default>
+        </entry>
+
+        <entry name="systrayUrl" type="String">
+            <default>http://127.0.0.1:27003/api/systray</default>
+        </entry>
+
+        <entry name="showBattery" type="Bool">
+            <default>true</default>
+        </entry>
+    </group>
+</kcfg>

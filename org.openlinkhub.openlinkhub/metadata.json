@@ -1,0 +1,15 @@
+{
+  "KPlugin": {
+    "Name": "OpenLinkHub",
+    "Description": "OpenLinkHub KDE PLasma Monitor Face",
+    "Icon": "computer-fan",
+    "Id": "org.openlinkhub.openlinkhub",
+    "Version": "1.0",
+    "License": "MIT",
+    "Authors": [
+      { "Name": "Nikola Jurkovic" }
+    ]
+  },
+  "X-KDE-ParentApp": "org.kde.plasmashell",
+  "KPackageStructure": "KSysguard/SensorFace"
+}
