@@ -1,6 +1,6 @@
-# OpenLinkHub KDE System Monitor plugin
+# OpenLinkHub KDE System Monitor Sensor Face
 
-## Install
+### Install
 - Extract org.openlinkhub.openlinkhub folder to `~/.local/share/ksysguard/sensorfaces/`
 - If `~/.local/share/ksysguard/sensorfaces/` does not exist, create complete path chain, starting from `ksysguard` and `sensorfaces`
 - Start KDE System Monitor application
