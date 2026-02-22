@@ -18,11 +18,15 @@ Faces.SensorFace {
     property bool cfgShowHubHeader: (cfg.showHubHeader !== undefined && cfg.showHubHeader !== null) ? cfg.showHubHeader : true
     property string systrayUrl: (cfg.systrayUrl && ("" + cfg.systrayUrl).length) ? cfg.systrayUrl : "http://127.0.0.1:27003/api/systray"
     property bool showBattery: (cfg.showBattery !== undefined && cfg.showBattery !== null) ? cfg.showBattery : true
+    property string storageUrl: (cfg.storageUrl && ("" + cfg.storageUrl).length) ? cfg.storageUrl : "http://127.0.0.1:27003/api/storageTemp"
+    property bool showStorage: (cfg.showStorage !== undefined && cfg.showStorage !== null) ? cfg.showStorage : true
 
     property string lastError: ""
     property string lastUpdatedText: ""
     property var flatRows: []
     property var batteryRows: []
+    property var storageRows: []
+    property var combinedRows: []
 
     function s(v) {
         if (v === null || v === undefined) return ""
@@ -183,6 +187,66 @@ Faces.SensorFace {
         xhr.send()
     }
 
+    function fetchStorage() {
+        if (!showStorage) { storageRows = []; rebuildCombinedRows(); return }
+        const url = storageUrl
+        if (!url || !url.trim().length) { storageRows = []; rebuildCombinedRows(); return }
+
+        const xhr = new XMLHttpRequest()
+        xhr.open("GET", url, true)
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState !== XMLHttpRequest.DONE) return
+                if (xhr.status < 200 || xhr.status >= 300) {
+                    storageRows = []
+                    rebuildCombinedRows()
+                    return
+                }
+                try {
+                    const parsed = JSON.parse(xhr.responseText)
+                    storageRows = buildStorageRows(parsed)
+                } catch (e) {
+                    storageRows = []
+                }
+                rebuildCombinedRows()
+        }
+
+        xhr.onerror = function() {
+            storageRows = []
+            rebuildCombinedRows()
+        }
+
+        xhr.send()
+    }
+
+    function buildStorageRows(obj) {
+        const out = []
+        const data = (obj && obj.data) ? obj.data : []
+        for (let i = 0; i < data.length; i++) {
+            const d = data[i]
+            if (!d) continue
+                out.push({
+                    type: "device",
+                    name: d.Model || d.Key,
+                    rpm: 0,
+                    temp: d.TemperatureString || ""
+                })
+        }
+        return out
+    }
+
+    function rebuildCombinedRows() {
+        const out = []
+        for (let i = 0; i < flatRows.length; i++) out.push(flatRows[i])
+
+            if (showStorage && storageRows.length > 0) {
+                out.push({ type: "section", title: "Storage Temperature" })
+                for (let i = 0; i < storageRows.length; i++) out.push(storageRows[i])
+            }
+
+            combinedRows = out
+    }
+
     Timer {
         id: pollTimer
         interval: cfgRefreshMs
@@ -191,6 +255,7 @@ Faces.SensorFace {
         onTriggered: {
             root.fetchJson()
             root.fetchSystray()
+            root.fetchStorage()
         }
     }
 
@@ -201,11 +266,15 @@ Faces.SensorFace {
         function onShowBatteryChanged() { root.fetchSystray() }
         function onRefreshMsChanged() { pollTimer.interval = root.cfgRefreshMs }
         function onShowHubHeaderChanged() { root.fetchJson() }
+        function onStorageUrlChanged() { root.fetchStorage() }
+        function onShowStorageChanged() { root.fetchStorage() }
     }
 
     Component.onCompleted: {
         fetchJson()
         fetchSystray()
+        fetchStorage()
+        rebuildCombinedRows()
     }
 
     contentItem: ColumnLayout {
@@ -245,7 +314,7 @@ Faces.SensorFace {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: root.flatRows
+            model: root.combinedRows
 
             delegate: Item {
                 width: ListView.view.width
@@ -259,16 +328,32 @@ Faces.SensorFace {
                     spacing: 4
 
                     RowLayout {
+                        visible: modelData.type === "section"
+                        Layout.fillWidth: true
+                        Label {
+                            text: modelData.title || ""
+                            font.bold: true
+                            opacity: 0.9
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    Item {
+                        visible: modelData.type === "spacer"
+                        Layout.fillWidth: true
+                        height: Kirigami.Units.smallSpacing * 2
+                    }
+
+                    RowLayout {
                         visible: modelData.type === "hub"
                         Layout.fillWidth: true
-
                         Label {
                             text: modelData.hubName
                             font.bold: true
                             Layout.fillWidth: true
                             elide: Text.ElideMiddle
                         }
-
                         Label {
                             text: modelData.firmware.length ? ("FW " + modelData.firmware) : ""
                             opacity: 0.8
@@ -279,19 +364,16 @@ Faces.SensorFace {
                         visible: modelData.type === "device"
                         Layout.fillWidth: true
                         spacing: 12
-
                         Label {
                             text: modelData.name
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                         }
-
                         Label {
                             text: (Number(modelData.rpm) > 0) ? (modelData.rpm + " RPM") : ""
                             Layout.preferredWidth: 110
                             horizontalAlignment: Text.AlignRight
                         }
-
                         Label {
                             text: modelData.temp
                             Layout.preferredWidth: 140
@@ -300,6 +382,7 @@ Faces.SensorFace {
                     }
 
                     Rectangle {
+                        visible: modelData.type !== "spacer"
                         Layout.fillWidth: true
                         height: 1
                         opacity: 0.15
@@ -316,8 +399,7 @@ Faces.SensorFace {
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 8
-
-                Label { text: "Battery"; font.bold: true }
+                //Label { text: "Battery"; font.bold: true }
 
                 Flow {
                     Layout.fillWidth: false
@@ -384,8 +466,6 @@ Faces.SensorFace {
 
                                             chart.nameSource: Charts.ArraySource { array: ["Level", "Remaining"] }
                                             chart.shortNameSource: Charts.ArraySource { array: ["", ""] }
-
-                                            // IMPORTANT: two colors for two slices
                                             chart.colorSource: Charts.ArraySource {
                                                 array: [ Kirigami.Theme.highlightColor, ring.trackColor ]
                                             }

@@ -27,5 +27,13 @@
         <entry name="showBattery" type="Bool">
             <default>true</default>
         </entry>
+
+        <entry name="storageUrl" type="String">
+            <default>http://127.0.0.1:27003/api/storageTemp</default>
+        </entry>
+
+        <entry name="showStorage" type="Bool">
+            <default>true</default>
+        </entry>
     </group>
 </kcfg>

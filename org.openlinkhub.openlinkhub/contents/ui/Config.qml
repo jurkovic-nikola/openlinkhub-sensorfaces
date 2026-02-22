@@ -11,6 +11,8 @@ ColumnLayout {
     property alias cfg_showHubHeader: hubHeaderCheck.checked
     property alias cfg_systrayUrl: systrayUrlField.text
     property alias cfg_showBattery: showBatteryCheck.checked
+    property alias cfg_storageUrl: storageUrlField.text
+    property alias cfg_showStorage: showStorageCheck.checked
 
     Label { text: "JSON URL:" }
     TextField {
@@ -24,6 +26,13 @@ ColumnLayout {
         id: systrayUrlField
         Layout.fillWidth: true
         placeholderText: "http://127.0.0.1:27003/api/systray"
+    }
+
+    Label { text: "Storage Temp URL:" }
+    TextField {
+        id: storageUrlField
+        Layout.fillWidth: true
+        placeholderText: "http://127.0.0.1:27003/api/storageTemp"
     }
 
     Label { text: "Refresh interval (ms):" }
@@ -45,6 +54,12 @@ ColumnLayout {
     CheckBox {
         id: showBatteryCheck
         text: "Show battery section"
+        checked: true
+    }
+
+    CheckBox {
+        id: showStorageCheck
+        text: "Show storage temperature section"
         checked: true
     }
 
