@@ -102,6 +102,9 @@ Faces.SensorFace {
                         for (const key in childMap) {
                             const ch = childMap[key]
                             if (!ch) continue
+                                if (typeof ch.deviceId === "string" && ch.deviceId === "Psu-0") {
+                                    continue
+                                }
 
                                 children.push({
                                     type: "device",
@@ -109,7 +112,10 @@ Faces.SensorFace {
                                     channelId: (ch.channelId !== undefined && ch.channelId !== null) ? s(ch.channelId) : s(key),
                                               name: s(ch.name),
                                               rpm: (ch.rpm === undefined || ch.rpm === null) ? "" : s(ch.rpm),
-                                              temp: formatTemp(ch)
+                                              temp: formatTemp(ch),
+                                              volts: (ch.volts === undefined || ch.volts === null) ? "" : s(ch.volts),
+                                              amps: (ch.amps === undefined || ch.amps === null) ? "" : s(ch.amps),
+                                              watts: (ch.watts === undefined || ch.watts === null) ? "" : s(ch.watts)
                                 })
                         }
 
@@ -240,7 +246,7 @@ Faces.SensorFace {
         for (let i = 0; i < flatRows.length; i++) out.push(flatRows[i])
 
             if (showStorage && storageRows.length > 0) {
-                out.push({ type: "section", title: "Storage Temperature" })
+                out.push({ type: "section", title: "Storage" })
                 for (let i = 0; i < storageRows.length; i++) out.push(storageRows[i])
             }
 
@@ -305,6 +311,9 @@ Faces.SensorFace {
                 spacing: 12
 
                 Label { text: "Device"; font.bold: true; Layout.fillWidth: true }
+                Label { text: "Volts"; font.bold: true; Layout.preferredWidth: 110; horizontalAlignment: Text.AlignRight }
+                Label { text: "Amps"; font.bold: true; Layout.preferredWidth: 110; horizontalAlignment: Text.AlignRight }
+                Label { text: "Watts"; font.bold: true; Layout.preferredWidth: 110; horizontalAlignment: Text.AlignRight }
                 Label { text: "RPM"; font.bold: true; Layout.preferredWidth: 110; horizontalAlignment: Text.AlignRight }
                 Label { text: "Temp"; font.bold: true; Layout.preferredWidth: 140; horizontalAlignment: Text.AlignRight }
             }
@@ -368,6 +377,21 @@ Faces.SensorFace {
                             text: modelData.name
                             Layout.fillWidth: true
                             elide: Text.ElideRight
+                        }
+                        Label {
+                            text: (Number(modelData.volts) > 0) ? (modelData.volts + " V") : ""
+                            Layout.preferredWidth: 110
+                            horizontalAlignment: Text.AlignRight
+                        }
+                        Label {
+                            text: (Number(modelData.amps) > 0) ? (modelData.amps + " A") : ""
+                            Layout.preferredWidth: 110
+                            horizontalAlignment: Text.AlignRight
+                        }
+                        Label {
+                            text: (Number(modelData.watts) > 0) ? (modelData.watts + " W") : ""
+                            Layout.preferredWidth: 110
+                            horizontalAlignment: Text.AlignRight
                         }
                         Label {
                             text: (Number(modelData.rpm) > 0) ? (modelData.rpm + " RPM") : ""
