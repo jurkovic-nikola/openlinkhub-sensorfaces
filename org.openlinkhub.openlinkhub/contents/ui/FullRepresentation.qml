@@ -12,6 +12,7 @@ Faces.SensorFace {
     implicitWidth: 520
     implicitHeight: 360
 
+    property bool hasPsu: false
     property var cfg: (controller && controller.faceConfiguration) ? controller.faceConfiguration : ({})
     property string cfgUrl: (cfg.url && ("" + cfg.url).length) ? cfg.url : "http://127.0.0.1:27003/api/devices"
     property int cfgRefreshMs: (cfg.refreshMs !== undefined && cfg.refreshMs !== null) ? cfg.refreshMs : 1000
@@ -103,6 +104,7 @@ Faces.SensorFace {
                             const ch = childMap[key]
                             if (!ch) continue
                                 if (typeof ch.deviceId === "string" && ch.deviceId === "Psu-0") {
+                                    hasPsu = true
                                     continue
                                 }
 
@@ -311,9 +313,26 @@ Faces.SensorFace {
                 spacing: 12
 
                 Label { text: "Device"; font.bold: true; Layout.fillWidth: true }
-                Label { text: "Volts"; font.bold: true; Layout.preferredWidth: 110; horizontalAlignment: Text.AlignRight }
-                Label { text: "Amps"; font.bold: true; Layout.preferredWidth: 110; horizontalAlignment: Text.AlignRight }
-                Label { text: "Watts"; font.bold: true; Layout.preferredWidth: 110; horizontalAlignment: Text.AlignRight }
+
+                Label {
+                    text: "Volts"; font.bold: true
+                    visible: root.hasPsu
+                    Layout.preferredWidth: root.hasPsu ? 110 : 0
+                    horizontalAlignment: Text.AlignRight
+                }
+                Label {
+                    text: "Amps"; font.bold: true
+                    visible: root.hasPsu
+                    Layout.preferredWidth: root.hasPsu ? 110 : 0
+                    horizontalAlignment: Text.AlignRight
+                }
+                Label {
+                    text: "Watts"; font.bold: true
+                    visible: root.hasPsu
+                    Layout.preferredWidth: root.hasPsu ? 110 : 0
+                    horizontalAlignment: Text.AlignRight
+                }
+
                 Label { text: "RPM"; font.bold: true; Layout.preferredWidth: 110; horizontalAlignment: Text.AlignRight }
                 Label { text: "Temp"; font.bold: true; Layout.preferredWidth: 140; horizontalAlignment: Text.AlignRight }
             }
