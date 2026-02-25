@@ -5,7 +5,8 @@
     "Icon": "computer-fan",
     "Id": "org.openlinkhub.openlinkhub",
     "Version": "1.0",
-    "License": "MIT",
+    "License": "GPL-3.0-or-later",
+    "LicenseSPDX": "GPL-3.0-or-later",
     "Authors": [
       { "Name": "Nikola Jurkovic" }
     ]
